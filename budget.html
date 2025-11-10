@@ -1,0 +1,1452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LifeHack Budget — Local & Offline</title>
+  <style>
+    :root {
+      /* Dark theme (default) */
+      --bg: #0b0c10;
+      --fg: #e6ebf0;
+      --muted: #9fb0c3;
+      --accent: #6ee7b7;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --blue: #60a5fa;
+      --violet: #a78bfa;
+      --card: #14161c;
+      --border: #232734;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      --radius: 14px;
+      --transition: all 0.3s ease;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --fg: #1e293b;
+      --muted: #64748b;
+      --accent: #10b981;
+      --red: #dc2626;
+      --amber: #d97706;
+      --blue: #2563eb;
+      --violet: #7c3aed;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      transition: var(--transition);
+      line-height: 1.5;
+    }
+
+    header {
+      padding: 18px 16px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      backdrop-filter: blur(6px);
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: .3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subhead {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 1000px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--fg);
+      outline: none;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(110, 231, 183, 0.2);
+    }
+
+    input[type="checkbox"] {
+      width: auto;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    button {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--fg);
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #0b0c10;
+    }
+
+    button.ghost {
+      background: transparent;
+    }
+
+    button.bad {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: white;
+    }
+
+    .section-title {
+      margin: 14px 0 8px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .kpi {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    @media (max-width: 700px) {
+      .kpi {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .amount {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .cat {
+      min-width: 90px;
+      display: inline-block;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .bar {
+      flex: 1;
+      height: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      width: 0%;
+      transition: width 1s ease-in-out;
+    }
+
+    .bar.needs span {
+      background: linear-gradient(90deg, var(--blue), var(--violet));
+    }
+
+    .bar.wants span {
+      background: linear-gradient(90deg, var(--amber), var(--warning));
+    }
+
+    .bar.save span {
+      background: linear-gradient(90deg, var(--success), var(--accent));
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 8px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    tbody td {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 8px;
+    }
+
+    tbody tr:hover {
+      background: rgba(110, 231, 183, 0.05);
+    }
+
+    .ai-panel {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .ai-out {
+      white-space: pre-wrap;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 8px;
+      max-height: 220px;
+      overflow: auto;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .theme-toggle {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .theme-toggle:hover {
+      background: var(--card);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast button {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 12, 16, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+    }
+
+    .modal.show .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal h2 {
+      margin-bottom: 16px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: flex-end;
+    }
+
+    .trend-chart {
+      width: 100%;
+      height: 200px;
+      margin-top: 16px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .action-buttons button {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .progress-value {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .delete-btn {
+      color: var(--danger);
+      background: transparent;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .delete-btn:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 600px) {
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .controls button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>LifeHack Budget <span class="tag">Local & Offline</span></h1>
+      <div class="subhead">Built for quick, honest money check‑ins. Data is saved in <code>localStorage</code> on this device.</div>
+    </div>
+    <div class="controls">
+      <button id="showOnboarding" class="ghost">Show Tips</button>
+      <button id="loadSample" class="ghost">Load Sample Data</button>
+      <button id="backupRestore" class="ghost">Backup/Restore</button>
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 2V4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M12 20V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4.93 4.93L6.34 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M17.66 17.66L19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 12H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M20 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6.34 17.66L4.93 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M19.07 4.93L17.66 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="app">
+    <div class="grid">
+      <!-- Left: Config & Quick Add -->
+      <section class="card">
+        <h3 style="margin-top:0">Income & Targets</h3>
+        <p class="sub">Add your monthly salary. Optionally tweak target split.</p>
+        <div class="row">
+          <div style="flex:1">
+            <label>Monthly Salary (INR)</label>
+            <input id="salary" type="number" min="0" placeholder="e.g., 45000" />
+          </div>
+          <div style="width:180px">
+            <label>Month</label>
+            <input id="month" type="month"/>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="row">
+          <div style="flex:1">
+            <label>Needs %</label>
+            <input id="pctNeeds" type="number" min="0" max="100" value="50" />
+          </div>
+          <div style="flex:1">
+            <label>Wants %</label>
+            <input id="pctWants" type="number" min="0" max="100" value="30" />
+          </div>
+          <div style="flex:1">
+            <label>Savings/Debt %</label>
+            <input id="pctSave" type="number" min="0" max="100" value="20" />
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <button id="saveConfig" class="primary">Save Config</button>
+          <button id="resetAll" class="ghost">Reset Data</button>
+        </div>
+
+        <h3 class="section-title">Quick Add Expense</h3>
+        <div class="row">
+          <select id="category">
+            <option>Rent</option><option>Groceries</option><option>Eating Out</option>
+            <option>Transport</option><option>Utilities</option><option>EMI/Loans</option>
+            <option>Shopping</option><option>Health</option><option>Entertainment</option>
+            <option>Other</option>
+          </select>
+          <input id="amount" type="number" placeholder="Amount" min="0" />
+        </div>
+        <div class="row" style="margin-top:8px">
+          <input id="note" type="text" placeholder="Short note (optional)" />
+          <input id="date" type="date" />
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button id="addExpense" class="primary">Add Expense</button>
+          <button id="exportCsv" class="ghost">Export CSV</button>
+        </div>
+
+        <h3 class="section-title">Gemini (optional)</h3>
+        <div class="row">
+          <input id="apiKey" type="password" placeholder="Paste your Gemini API Key (browser)" />
+          <button id="testAI" class="ghost">Ping</button>
+        </div>
+        <p class="sub" style="margin-top:6px">Key is used in your browser only. For production, proxy the key from a backend.</p>
+      </section>
+
+      <!-- Middle: KPIs & Budget Bars -->
+      <section class="card">
+        <h3 style="margin:0 0 8px">This Month</h3>
+        <div class="kpi">
+          <div class="card" style="padding:12px;background:var(--card)">
+            <div class="sub">Income</div>
+            <div class="amount" id="kpiIncome">—</div>
+          </div>
+          <div class="card" style="padding:12px;background:var(--card)">
+            <div class="sub">Spent</div>
+            <div class="amount" id="kpiSpent">—</div>
+          </div>
+          <div class="card" style="padding:12px;background:var(--card)">
+            <div class="sub">Leftover</div>
+            <div class="amount" id="kpiLeft">—</div>
+          </div>
+          <div class="card" style="padding:12px;background:var(--card)">
+            <div class="sub">Savings Rate</div>
+            <div class="amount" id="kpiRate">—</div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px">
+          <div class="progress-label">
+            <span class="cat">Needs <span id="needsPct">50%</span></span>
+            <span class="progress-value" id="needsValue">₹0 / ₹0</span>
+          </div>
+          <div class="bar needs"><span id="barNeeds" style="width:0%"></span></div>
+          
+          <div class="progress-label" style="margin-top:6px">
+            <span class="cat">Wants <span id="wantsPct">30%</span></span>
+            <span class="progress-value" id="wantsValue">₹0 / ₹0</span>
+          </div>
+          <div class="bar wants"><span id="barWants" style="width:0%"></span></div>
+          
+          <div class="progress-label" style="margin-top:6px">
+            <span class="cat">Savings <span id="savePct">20%</span></span>
+            <span class="progress-value" id="saveValue">₹0 / ₹0</span>
+          </div>
+          <div class="bar save"><span id="barSave" style="width:0%"></span></div>
+          
+          <p class="sub" id="budgetHint" style="margin-top:6px"></p>
+        </div>
+
+        <div style="margin-top:12px" class="row">
+          <button id="aiCoach" class="primary">Ask AI to Fix My Budget</button>
+          <button id="clearAI" class="ghost">Clear Advice</button>
+        </div>
+
+        <div class="ai-panel" style="margin-top:8px">
+          <textarea id="aiPrompt" placeholder="Optional: add context (upcoming travel, medical bills, target savings, etc.)"></textarea>
+          <div class="ai-out" id="aiOut"></div>
+        </div>
+      </section>
+
+      <!-- Right: Table -->
+      <section class="card">
+        <h3 style="margin:0 0 8px">Expenses</h3>
+        <div class="row" style="margin-bottom:6px">
+          <input id="search" type="search" placeholder="Search note/category" />
+          <button id="deleteSelected" class="bad">Delete Selected</button>
+        </div>
+        <div style="max-height:420px;overflow:auto;border:1px solid var(--border);border-radius:12px">
+          <table id="tbl">
+            <thead>
+              <tr>
+                <th style="width:36px"><input type="checkbox" id="toggleAll" /></th>
+                <th>Date</th><th>Category</th><th>Note</th><th>Amount</th><th style="width:40px"></th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        
+        <h3 class="section-title">Spending Trend</h3>
+        <canvas class="trend-chart" id="trendChart"></canvas>
+      </section>
+    </div>
+
+    <p class="hint">Tip: pressing <b>Ctrl/Cmd + S</b> won't save your data — use the Save button above.</p>
+  </div>
+
+  <!-- Toast for undo actions -->
+  <div class="toast" id="toast">
+    <span id="toastMessage">Item deleted</span>
+    <button id="undoAction" class="ghost">Undo</button>
+  </div>
+
+  <!-- Onboarding Modal -->
+  <div class="modal" id="onboardingModal">
+    <div class="modal-content">
+      <h2>Welcome to LifeHack Budget</h2>
+      <p>Here's how to get started:</p>
+      <ul style="margin: 12px 0; padding-left: 20px;">
+        <li>Set your monthly income and budget targets</li>
+        <li>Add expenses as you spend throughout the month</li>
+        <li>Track your progress with the visual budget bars</li>
+        <li>Use the AI coach for personalized budget advice</li>
+        <li>Export your data or create encrypted backups</li>
+      </ul>
+      <p>Your data is stored locally on this device and never leaves your browser.</p>
+      <div class="modal-buttons">
+        <button id="closeOnboarding" class="primary">Get Started</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backup/Restore Modal -->
+  <div class="modal" id="backupModal">
+    <div class="modal-content">
+      <h2>Backup & Restore</h2>
+      <p>Create an encrypted backup of your data or restore from a previous backup.</p>
+      
+      <h3 class="section-title">Create Backup</h3>
+      <div class="row">
+        <input type="password" id="backupPassword" placeholder="Enter encryption password" />
+        <button id="createBackup" class="primary">Create Backup</button>
+      </div>
+      <textarea id="backupData" placeholder="Backup data will appear here" readonly style="margin-top: 10px;"></textarea>
+      
+      <h3 class="section-title">Restore Backup</h3>
+      <div class="row">
+        <input type="password" id="restorePassword" placeholder="Enter encryption password" />
+        <button id="restoreBackup" class="primary">Restore Backup</button>
+      </div>
+      <textarea id="restoreData" placeholder="Paste backup data here" style="margin-top: 10px;"></textarea>
+      
+      <div class="modal-buttons">
+        <button id="closeBackup" class="ghost">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ---------- State & Storage ----------
+  const LS_KEY = 'lhb_v2';
+  const THEME_KEY = 'lhb_theme';
+  const ONBOARDING_KEY = 'lhb_onboarding';
+  const defaultState = () => ({
+    config: { salary:0, month:fmtMonth(new Date()), pctNeeds:50, pctWants:30, pctSave:20 },
+    expenses:[],
+    aiKey:''
+  });
+  let state = load();
+  let deletedItems = [];
+  let lastDeletedIds = [];
+
+  function load(){
+    try { return JSON.parse(localStorage.getItem(LS_KEY)) || defaultState(); }
+    catch(e){ return defaultState(); }
+  }
+  function persist(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+  // ---------- Theme Management ----------
+  function initTheme() {
+    const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
+
+  function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem(THEME_KEY, newTheme);
+  }
+
+  // ---------- Onboarding ----------
+  function showOnboarding() {
+    el('onboardingModal').classList.add('show');
+  }
+
+  function hideOnboarding() {
+    el('onboardingModal').classList.remove('show');
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+  }
+
+  // ---------- Toast Notifications ----------
+  function showToast(message, undoCallback = null) {
+    const toast = el('toast');
+    el('toastMessage').textContent = message;
+    
+    if (undoCallback) {
+      el('undoAction').style.display = 'inline-flex';
+      el('undoAction').onclick = () => {
+        undoCallback();
+        hideToast();
+      };
+    } else {
+      el('undoAction').style.display = 'none';
+    }
+    
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+      hideToast();
+    }, 5000);
+  }
+
+  function hideToast() {
+    el('toast').classList.remove('show');
+  }
+
+  // ---------- DOM Helpers ----------
+  const $ = sel => document.querySelector(sel);
+  const el = id => document.getElementById(id);
+  const fmtINR = n => (n||0).toLocaleString('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0});
+  function fmtMonth(d){ return new Date(d).toISOString().slice(0,7); }
+  function today(){ return new Date().toISOString().slice(0,10); }
+
+  // Needs/Wants mapping (tweak as you like)
+  const NEEDS = new Set(['Rent','Groceries','Transport','Utilities','EMI/Loans','Health']);
+  const WANTS = new Set(['Eating Out','Shopping','Entertainment','Other']);
+
+  // Auto-categorization keywords
+  const CATEGORY_KEYWORDS = {
+    'Eating Out': ['zomato', 'swiggy', 'restaurant', 'cafe', 'food', 'dinner', 'lunch', 'breakfast'],
+    'Groceries': ['grocery', 'supermarket', 'vegetable', 'fruit', 'milk', 'bread'],
+    'Transport': ['uber', 'ola', 'taxi', 'bus', 'metro', 'fuel', 'petrol', 'diesel'],
+    'Shopping': ['amazon', 'flipkart', 'myntra', 'clothes', 'shoes', 'electronics'],
+    'Entertainment': ['netflix', 'prime', 'hotstar', 'movie', 'cinema', 'concert'],
+    'Health': ['hospital', 'doctor', 'medicine', 'pharmacy', 'medical']
+  };
+
+  // ---------- Init UI with state ----------
+  function init(){
+    initTheme();
+    
+    el('salary').value = state.config.salary;
+    el('month').value = state.config.month;
+    el('pctNeeds').value = state.config.pctNeeds;
+    el('pctWants').value = state.config.pctWants;
+    el('pctSave').value = state.config.pctSave;
+    el('date').value = today();
+    el('apiKey').value = state.aiKey || '';
+    render();
+    
+    // Show onboarding if first time
+    if (!localStorage.getItem(ONBOARDING_KEY)) {
+      setTimeout(showOnboarding, 1000);
+    }
+  }
+
+  // ---------- Events ----------
+  el('saveConfig').addEventListener('click', () => {
+    const salary = +el('salary').value||0;
+    const month = el('month').value || fmtMonth(new Date());
+    let n = +el('pctNeeds').value||0, w = +el('pctWants').value||0, s = +el('pctSave').value||0;
+    const total = n+w+s;
+    if(total !== 100){
+      // normalize gently
+      n = Math.round(n/total*100)||0; w = Math.round(w/total*100)||0; s = 100-n-w; 
+      el('pctNeeds').value=n; el('pctWants').value=w; el('pctSave').value=s;
+    }
+    state.config = { salary, month, pctNeeds:n, pctWants:w, pctSave:s };
+    persist();
+    render();
+    showToast('Configuration saved');
+  });
+
+  el('resetAll').addEventListener('click', () => {
+    if(confirm('This will clear all data on this device. Continue?')){
+      state = defaultState();
+      persist();
+      init();
+      showToast('All data has been reset');
+    }
+  });
+
+  el('addExpense').addEventListener('click', addExpense);
+  el('amount').addEventListener('keydown', (e)=>{ if(e.key==='Enter') addExpense(); });
+
+  function addExpense(){
+    const amt = +el('amount').value;
+    let cat = el('category').value;
+    let note = el('note').value.trim();
+    const date = el('date').value || today();
+    if(!(amt>0)) return alert('Enter a valid amount');
+    
+    // Auto-categorize if note has keywords and category is "Other"
+    if (cat === 'Other' && note) {
+      const detectedCat = autoCategorize(note);
+      if (detectedCat) cat = detectedCat;
+    }
+    
+    state.expenses.push({ id:crypto.randomUUID(), date, category:cat, note, amount:amt });
+    el('amount').value=''; el('note').value='';
+    persist(); 
+    renderTable(); 
+    renderKPI(); 
+    renderBars();
+    renderTrendChart();
+    showToast('Expense added');
+  }
+
+  function autoCategorize(note) {
+    const lowerNote = note.toLowerCase();
+    for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+      if (keywords.some(keyword => lowerNote.includes(keyword))) {
+        return category;
+      }
+    }
+    return null;
+  }
+
+  el('search').addEventListener('input', renderTable);
+  el('deleteSelected').addEventListener('click', () => {
+    const ids = [...document.querySelectorAll('tbody input[type=checkbox]:checked')].map(x=>x.dataset.id);
+    if(!ids.length) return;
+    if(!confirm(`Delete ${ids.length} item(s)?`)) return;
+    
+    // Store deleted items for potential undo
+    lastDeletedIds = ids;
+    deletedItems = state.expenses.filter(x => ids.includes(x.id));
+    
+    state.expenses = state.expenses.filter(x => !ids.includes(x.id));
+    persist(); 
+    render();
+    renderTrendChart();
+    
+    showToast(`${ids.length} expense(s) deleted`, () => {
+      // Undo delete
+      state.expenses = [...state.expenses, ...deletedItems];
+      persist();
+      render();
+      renderTrendChart();
+    });
+  });
+  
+  el('toggleAll').addEventListener('change', (e)=>{
+    document.querySelectorAll('tbody input[type=checkbox]').forEach(cb => cb.checked = e.target.checked);
+  });
+
+  el('exportCsv').addEventListener('click', () => {
+    const rows = [['id','date','category','note','amount']]
+      .concat(state.expenses.map(x => [x.id, x.date, x.category, escapeCsv(x.note||''), x.amount]));
+    const csv = rows.map(r => r.join(',')).join('\n');
+    download('expenses.csv', csv);
+    showToast('CSV exported successfully');
+  });
+  
+  function escapeCsv(s){ return '"'+String(s).replace(/"/g,'""')+'"'; }
+  
+  function download(name, text){
+    const a = document.createElement('a'); 
+    a.href = URL.createObjectURL(new Blob([text], {type:'text/csv'})); 
+    a.download = name; 
+    a.click(); 
+    URL.revokeObjectURL(a.href);
+  }
+
+  // AI: store key, ping, advice
+  el('apiKey').addEventListener('change', ()=>{ state.aiKey = el('apiKey').value.trim(); persist(); });
+  el('testAI').addEventListener('click', async ()=>{
+    const out = el('aiOut'); out.textContent='Pinging…';
+    try{ 
+      const res = await geminiCall("gemini-2.5-flash", [{text:"Reply with the single word: pong"}]);
+      out.textContent = res || 'No response';
+      showToast('AI connection successful');
+    }catch(err){ 
+      out.textContent = 'Ping failed: '+ err.message; 
+      showToast('AI connection failed');
+    }
+  });
+
+  el('aiCoach').addEventListener('click', async ()=>{
+    const out = el('aiOut');
+    const cx = collectContext();
+    out.textContent = 'Thinking…';
+    try{
+      const prompt = `You are a no-nonsense Indian budget coach.
+Given this monthly snapshot, write a short plan to fix overspending.
+Return at most 8 bullets with concrete rupee amounts and category swaps.
+Avoid generic advice; make it personal to the numbers. If spending is healthy, say so.
+
+${JSON.stringify(cx, null, 2)}
+
+User notes: ${el('aiPrompt').value || '(none)'}`;
+      const text = await geminiCall("gemini-2.5-flash", [{text: prompt}]);
+      out.textContent = text || 'No advice returned.';
+      showToast('Budget advice generated');
+    }catch(err){ 
+      out.textContent = 'AI error: '+err.message; 
+      showToast('Failed to generate advice');
+    }
+  });
+
+  el('clearAI').addEventListener('click', ()=>{ 
+    el('aiOut').textContent=''; 
+    el('aiPrompt').value=''; 
+    showToast('AI advice cleared');
+  });
+
+  // Theme toggle
+  el('themeToggle').addEventListener('click', toggleTheme);
+
+  // Onboarding
+  el('showOnboarding').addEventListener('click', showOnboarding);
+  el('closeOnboarding').addEventListener('click', hideOnboarding);
+
+  // Sample data
+  el('loadSample').addEventListener('click', () => {
+    if (confirm('Load sample data? This will replace your current data.')) {
+      loadSampleData();
+      showToast('Sample data loaded');
+    }
+  });
+
+  // Backup/Restore
+  el('backupRestore').addEventListener('click', () => {
+    el('backupModal').classList.add('show');
+  });
+  
+  el('closeBackup').addEventListener('click', () => {
+    el('backupModal').classList.remove('show');
+  });
+  
+  el('createBackup').addEventListener('click', async () => {
+    const password = el('backupPassword').value;
+    if (!password) {
+      alert('Please enter a password');
+      return;
+    }
+    
+    try {
+      const backup = await createEncryptedBackup(password);
+      el('backupData').value = backup;
+      showToast('Backup created successfully');
+    } catch (e) {
+      alert('Failed to create backup: ' + e.message);
+    }
+  });
+  
+  el('restoreBackup').addEventListener('click', async () => {
+    const password = el('restorePassword').value;
+    const backupData = el('restoreData').value;
+    
+    if (!password || !backupData) {
+      alert('Please enter both password and backup data');
+      return;
+    }
+    
+    try {
+      await restoreFromBackup(backupData, password);
+      el('backupModal').classList.remove('show');
+      init();
+      showToast('Backup restored successfully');
+    } catch (e) {
+      alert('Failed to restore backup: ' + e.message);
+    }
+  });
+
+  // ---------- Rendering ----------
+  function render(){ 
+    renderKPI(); 
+    renderBars(); 
+    renderTable(); 
+    renderPctLabels(); 
+    hint(); 
+  }
+
+  function renderPctLabels(){
+    el('needsPct').textContent = (state.config.pctNeeds||0)+ '%';
+    el('wantsPct').textContent = (state.config.pctWants||0)+ '%';
+    el('savePct').textContent = (state.config.pctSave||0)+ '%';
+  }
+
+  function monthFilter(x){ return (x.date||'').slice(0,7) === state.config.month; }
+
+  function renderKPI(){
+    const list = state.expenses.filter(monthFilter);
+    const income = +state.config.salary||0;
+    const spent = list.reduce((a,b)=>a + (+b.amount||0), 0);
+    const left = income - spent;
+    const rate = income>0 ? Math.max(0, left)/income*100 : 0;
+    el('kpiIncome').textContent = fmtINR(income);
+    el('kpiSpent').textContent  = fmtINR(spent);
+    el('kpiLeft').textContent   = fmtINR(Math.max(0,left));
+    el('kpiRate').textContent   = (rate).toFixed(0)+ '%';
+  }
+
+  function renderBars(){
+    const list = state.expenses.filter(monthFilter);
+    const income = +state.config.salary||0; 
+    
+    if(!income){ 
+      el('barNeeds').style.width='0%'; 
+      el('barWants').style.width='0%'; 
+      el('barSave').style.width='0%'; 
+      el('needsValue').textContent = '₹0 / ₹0';
+      el('wantsValue').textContent = '₹0 / ₹0';
+      el('saveValue').textContent = '₹0 / ₹0';
+      return; 
+    }
+    
+    const needsSpent = sumIf(list, e=>NEEDS.has(e.category));
+    const wantsSpent = sumIf(list, e=>WANTS.has(e.category));
+    
+    const needsTarget = income * (state.config.pctNeeds/100);
+    const wantsTarget = income * (state.config.pctWants/100);
+    const saveTarget = income * (state.config.pctSave/100);
+    
+    const needPct = Math.min(100, (needsSpent / needsTarget)*100 || 0);
+    const wantPct = Math.min(100, (wantsSpent / wantsTarget)*100 || 0);
+    const savePct = Math.min(100, ((Math.max(0, income - (needsSpent+wantsSpent))) / saveTarget)*100 || 0);
+
+    // Animate the bars
+    setTimeout(() => {
+      el('barNeeds').style.width = needPct + '%';
+      el('barWants').style.width = wantPct + '%';
+      el('barSave').style.width  = savePct + '%';
+    }, 100);
+    
+    // Update values
+    el('needsValue').textContent = `${fmtINR(needsSpent)} / ${fmtINR(needsTarget)}`;
+    el('wantsValue').textContent = `${fmtINR(wantsSpent)} / ${fmtINR(wantsTarget)}`;
+    el('saveValue').textContent = `${fmtINR(Math.max(0, income - (needsSpent+wantsSpent)))} / ${fmtINR(saveTarget)}`;
+  }
+  
+  function sumIf(list, pred){ 
+    return list.reduce((a,b)=> a + (pred(b)?(+b.amount||0):0), 0); 
+  }
+
+  function hint(){
+    const income = +state.config.salary||0;
+    const list = state.expenses.filter(monthFilter);
+    const needsSpent = sumIf(list, e=>NEEDS.has(e.category));
+    const wantsSpent = sumIf(list, e=>WANTS.has(e.category));
+
+    if(!income){ 
+      el('budgetHint').textContent='Add salary to activate targets.'; 
+      return; 
+    }
+    
+    const nTarget = income*(state.config.pctNeeds/100);
+    const wTarget = income*(state.config.pctWants/100);
+    let msg = [];
+    if(needsSpent>nTarget) msg.push(`Needs over by ${fmtINR(needsSpent-nTarget)}`);
+    if(wantsSpent>wTarget) msg.push(`Wants over by ${fmtINR(wantsSpent-wTarget)}`);
+    const saved = Math.max(0, income - (needsSpent+wantsSpent));
+    msg.push(`Projected savings: ${fmtINR(saved)}`);
+    el('budgetHint').textContent = msg.join(' • ');
+  }
+
+  function renderTable(){
+    const q = (el('search').value||'').toLowerCase();
+    const rows = state.expenses
+      .filter(monthFilter)
+      .filter(x => !q || x.category.toLowerCase().includes(q) || (x.note||'').toLowerCase().includes(q))
+      .sort((a,b)=> (a.date<b.date?1:-1));
+
+    const tbody = el('tbody');
+    tbody.innerHTML = rows.map(r => `
+      <tr>
+        <td><input type="checkbox" data-id="${r.id}" /></td>
+        <td>${r.date}</td>
+        <td>${r.category}</td>
+        <td>${escapeHtml(r.note||'')}</td>
+        <td style="text-align:right">${fmtINR(r.amount)}</td>
+        <td>
+          <button class="delete-btn" data-id="${r.id}" title="Delete this expense">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7M10 11V17M14 11V17M15 7V4C15 3.44772 14.5523 3 14 3H10C9.44772 3 9 3.44772 9 4V7M4 7H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+    
+    // Add event listeners to delete buttons
+    tbody.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const id = this.dataset.id;
+        const expense = state.expenses.find(e => e.id === id);
+        
+        if (confirm(`Delete "${expense.note || expense.category}" expense of ${fmtINR(expense.amount)}?`)) {
+          // Store for potential undo
+          deletedItems = [expense];
+          lastDeletedIds = [id];
+          
+          state.expenses = state.expenses.filter(e => e.id !== id);
+          persist();
+          render();
+          renderTrendChart();
+          
+          showToast('Expense deleted', () => {
+            // Undo delete
+            state.expenses = [...state.expenses, ...deletedItems];
+            persist();
+            render();
+            renderTrendChart();
+          });
+        }
+      });
+    });
+  }
+  
+  function escapeHtml(s){ 
+    return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c])); 
+  }
+
+  // ---------- Trend Chart ----------
+  function renderTrendChart() {
+    const canvas = el('trendChart');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width = canvas.offsetWidth;
+    const height = canvas.height = canvas.offsetHeight;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Get last 12 months of data
+    const months = [];
+    const now = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push(fmtMonth(date));
+    }
+    
+    // Calculate spending per month
+    const spending = months.map(month => {
+      return state.expenses
+        .filter(expense => expense.date.startsWith(month))
+        .reduce((sum, expense) => sum + expense.amount, 0);
+    });
+    
+    // Find max spending for scaling
+    const maxSpending = Math.max(...spending, 1);
+    
+    // Draw chart
+    const padding = 30;
+    const chartWidth = width - padding * 2;
+    const chartHeight = height - padding * 2;
+    
+    // Draw grid lines
+    ctx.strokeStyle = getCSSVariable('--border');
+    ctx.lineWidth = 1;
+    ctx.setLineDash([5, 3]);
+    
+    // Horizontal grid lines
+    for (let i = 0; i <= 4; i++) {
+      const y = padding + (chartHeight / 4) * i;
+      ctx.beginPath();
+      ctx.moveTo(padding, y);
+      ctx.lineTo(width - padding, y);
+      ctx.stroke();
+    }
+    
+    ctx.setLineDash([]);
+    
+    // Draw trend line
+    ctx.beginPath();
+    ctx.strokeStyle = getCSSVariable('--accent');
+    ctx.lineWidth = 2;
+    
+    spending.forEach((amount, index) => {
+      const x = padding + (chartWidth / 11) * index;
+      const y = padding + chartHeight - (amount / maxSpending) * chartHeight;
+      
+      if (index === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    
+    ctx.stroke();
+    
+    // Draw data points
+    ctx.fillStyle = getCSSVariable('--accent');
+    spending.forEach((amount, index) => {
+      const x = padding + (chartWidth / 11) * index;
+      const y = padding + chartHeight - (amount / maxSpending) * chartHeight;
+      
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    
+    // Draw labels
+    ctx.fillStyle = getCSSVariable('--muted');
+    ctx.font = '10px Inter';
+    ctx.textAlign = 'center';
+    
+    // X-axis labels (months)
+    months.forEach((month, index) => {
+      const x = padding + (chartWidth / 11) * index;
+      const y = height - padding / 2;
+      
+      // Show abbreviated month
+      const date = new Date(month + '-01');
+      const label = date.toLocaleDateString('en', { month: 'short' });
+      
+      ctx.fillText(label, x, y);
+    });
+    
+    // Y-axis labels (amounts)
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= 4; i++) {
+      const value = Math.round(maxSpending * (1 - i/4));
+      const y = padding + (chartHeight / 4) * i;
+      
+      ctx.fillText(fmtINR(value), padding - 5, y + 3);
+    }
+  }
+  
+  function getCSSVariable(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name);
+  }
+
+  // ---------- Sample Data ----------
+  function loadSampleData() {
+    const sampleExpenses = [
+      { id: crypto.randomUUID(), date: fmtMonth(new Date()) + '-05', category: 'Rent', note: 'Monthly rent', amount: 15000 },
+      { id: crypto.randomUUID(), date: fmtMonth(new Date()) + '-08', category: 'Groceries', note: 'Big Bazaar', amount: 3500 },
+      { id: crypto.randomUUID(), date: fmtMonth(new Date()) + '-10', category: 'Eating Out', note: 'Dinner with friends', amount: 1200 },
+      { id: crypto.randomUUID(), date: fmtMonth(new Date()) + '-12', category: 'Transport', note: 'Fuel', amount: 2000 },
+      { id: crypto.randomUUID(), date: fmtMonth(new Date()) + '-15', category: 'Utilities', note: 'Electricity bill', amount: 1800 },
+      { id: crypto.randomUUID(), date: fmtMonth(new Date()) + '-18', category: 'EMI/Loans', note: 'Car loan', amount: 8000 },
+      { id: crypto.randomUUID(), date: fmtMonth(new Date()) + '-20', category: 'Shopping', note: 'New headphones', amount: 2500 },
+      { id: crypto.randomUUID(), date: fmtMonth(new Date()) + '-22', category: 'Entertainment', note: 'Netflix subscription', amount: 499 },
+      { id: crypto.randomUUID(), date: fmtMonth(new Date()) + '-25', category: 'Health', note: 'Doctor visit', amount: 800 },
+    ];
+    
+    state.config.salary = 50000;
+    state.expenses = sampleExpenses;
+    persist();
+    init();
+  }
+
+  // ---------- Encryption Functions ----------
+  async function createEncryptedBackup(password) {
+    const dataStr = JSON.stringify(state);
+    const encoder = new TextEncoder();
+    const data = encoder.encode(dataStr);
+    
+    // Generate a random salt
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    
+    // Derive key from password
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(password),
+      'PBKDF2',
+      false,
+      ['deriveKey']
+    );
+    
+    const key = await crypto.subtle.deriveKey(
+      {
+        name: 'PBKDF2',
+        salt: salt,
+        iterations: 100000,
+        hash: 'SHA-256'
+      },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt']
+    );
+    
+    // Generate a random IV
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    
+    // Encrypt the data
+    const encrypted = await crypto.subtle.encrypt(
+      {
+        name: 'AES-GCM',
+        iv: iv
+      },
+      key,
+      data
+    );
+    
+    // Combine salt, iv, and encrypted data
+    const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+    combined.set(salt, 0);
+    combined.set(iv, salt.length);
+    combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+    
+    // Convert to base64 for storage
+    return btoa(String.fromCharCode(...combined));
+  }
+  
+  async function restoreFromBackup(backupData, password) {
+    try {
+      // Convert from base64
+      const combined = Uint8Array.from(atob(backupData), c => c.charCodeAt(0));
+      
+      // Extract salt, iv, and encrypted data
+      const salt = combined.slice(0, 16);
+      const iv = combined.slice(16, 28);
+      const encrypted = combined.slice(28);
+      
+      // Derive key from password
+      const encoder = new TextEncoder();
+      const keyMaterial = await crypto.subtle.importKey(
+        'raw',
+        encoder.encode(password),
+        'PBKDF2',
+        false,
+        ['deriveKey']
+      );
+      
+      const key = await crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: salt,
+          iterations: 100000,
+          hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt']
+      );
+      
+      // Decrypt the data
+      const decrypted = await crypto.subtle.decrypt(
+        {
+          name: 'AES-GCM',
+          iv: iv
+        },
+        key,
+        encrypted
+      );
+      
+      // Convert back to string and parse
+      const decoder = new TextDecoder();
+      const dataStr = decoder.decode(decrypted);
+      const newState = JSON.parse(dataStr);
+      
+      // Update state
+      state = newState;
+      persist();
+    } catch (e) {
+      throw new Error('Failed to decrypt backup. Wrong password?');
+    }
+  }
+
+  // ---------- Gemini Minimal Client (browser) ----------
+  async function geminiCall(model, parts){
+    const key = state.aiKey || el('apiKey').value.trim();
+    if(!key) throw new Error('Missing API key');
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
+    const body = { contents: [{ role:'user', parts: parts.map(p=>({text:p.text})) }] };
+    const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    if(!res.ok){
+      const t = await res.text();
+      throw new Error(`${res.status} ${res.statusText}: ${t}`);
+    }
+    const data = await res.json();
+    const text = data?.candidates?.[0]?.content?.parts?.map(p=>p.text).join('\n').trim();
+    return text;
+  }
+
+  function collectContext(){
+    const cfg = state.config; 
+    const list = state.expenses.filter(monthFilter);
+    const totals = Object.values(list.reduce((acc,e)=>{ acc[e.category]=(acc[e.category]||0)+(+e.amount||0); return acc; },{}));
+    const byCat = list.reduce((acc,e)=>{ acc[e.category]=(acc[e.category]||0)+(+e.amount||0); return acc; },{});
+    return {
+      month: cfg.month,
+      salary: cfg.salary,
+      targets: { needs: cfg.pctNeeds, wants: cfg.pctWants, save: cfg.pctSave },
+      spent:{ total: list.reduce((a,b)=>a+(+b.amount||0),0), byCategory: byCat },
+      mapping: { needs:[...NEEDS], wants:[...WANTS] }
+    };
+  }
+
+  // Keyboard: Ctrl/Cmd+S triggers Save Config subtly
+  window.addEventListener('keydown', (e)=>{
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){
+      e.preventDefault(); 
+      el('saveConfig').click();
+    }
+  });
+
+  // Handle window resize for chart
+  window.addEventListener('resize', () => {
+    renderTrendChart();
+  });
+
+  init();
+  </script>
+</body>
+</html>
